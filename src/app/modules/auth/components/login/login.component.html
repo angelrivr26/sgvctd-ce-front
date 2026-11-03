@@ -1,0 +1,65 @@
+<div class="login-page">
+  <section class="login-intro">
+    <img src="assets/logo-sernanp.svg" alt="SERNANP" class="login-logo" />
+    <div class="login-intro-content">
+      <span class="eyebrow">GESTIÓN CONTABLE</span>
+      <h1>Cada compra,<br />un comprobante.<br /><span>Todo conectado.</span></h1>
+      <p>Consulta, seguimiento y documentos de las compras de Boletos SERNANP, en un solo lugar.</p>
+      <div class="login-flow">
+        <span>Compra confirmada</span><b>→</b><span>Comprobante</span><b>→</b
+        ><span>Documentos</span>
+      </div>
+    </div>
+    <div class="login-intro-footer">
+      Servicio Nacional de Áreas Naturales Protegidas por el Estado
+    </div>
+  </section>
+  <section class="login-panel">
+    <div class="login-card">
+      <span class="environment-pill">AMBIENTE DE PRUEBAS</span>
+      <h2>Bienvenido</h2>
+      <p>Ingresa con tu cuenta de Contabilidad.</p>
+      <form (ngSubmit)="submit()" #form="ngForm">
+        <label for="usuario">Usuario</label
+        ><input
+          id="usuario"
+          name="usuario"
+          [(ngModel)]="usuario"
+          autocomplete="username"
+          required
+          maxlength="80"
+          placeholder="Tu usuario"
+        />
+        <label for="clave">Contraseña</label
+        ><input
+          id="clave"
+          name="clave"
+          [(ngModel)]="clave"
+          type="password"
+          autocomplete="current-password"
+          required
+          maxlength="200"
+          placeholder="Tu contraseña"
+        />
+        @if (error()) {
+          <div class="alert error" role="alert">{{ error() }}</div>
+        }
+        <button
+          class="button primary login-submit"
+          type="submit"
+          [disabled]="form.invalid || loading()"
+        >
+          {{ loading() ? 'Ingresando…' : 'Ingresar al sistema' }} <span aria-hidden="true">→</span>
+        </button>
+      </form>
+      <div class="login-notice">
+        <strong>Documentos simulados</strong>
+        <p>
+          Este ambiente permite validar el circuito de emisión. Los documentos no tienen validez
+          tributaria y los correos se capturan localmente.
+        </p>
+      </div>
+    </div>
+    <span class="login-footnote">Acceso restringido a personal autorizado</span>
+  </section>
+</div>

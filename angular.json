@@ -1,0 +1,46 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": { "analytics": false },
+  "projects": {
+    "comprobantes": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/comprobantes",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "assets": [{ "glob": "**/*", "input": "src/assets", "output": "assets" }],
+            "styles": ["src/styles.css"]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                { "type": "initial", "maximumWarning": "650kB", "maximumError": "900kB" },
+                { "type": "anyComponentStyle", "maximumWarning": "12kB", "maximumError": "20kB" }
+              ],
+              "outputHashing": "all"
+            },
+            "development": { "optimization": false, "sourceMap": true, "extractLicenses": false }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": { "proxyConfig": "proxy.conf.json", "host": "localhost", "port": 4205 },
+          "configurations": {
+            "development": { "buildTarget": "comprobantes:build:development" },
+            "production": { "buildTarget": "comprobantes:build:production" }
+          },
+          "defaultConfiguration": "development"
+        }
+      }
+    }
+  }
+}

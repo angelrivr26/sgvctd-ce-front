@@ -1,0 +1,246 @@
+<a class="back-link" routerLink="/comprobantes">← Volver a comprobantes</a>
+@if (error()) {
+  <div class="alert error" role="alert">{{ error() }}</div>
+}
+@if (notice()) {
+  <div class="alert success" role="status">{{ notice() }}</div>
+}
+@if (item(); as data) {
+  <section class="page-heading">
+    <div>
+      <span class="eyebrow">DETALLE DE LA COMPRA</span>
+      <h1>{{ data.compraId }}</h1>
+      <p>
+        Recibida el {{ data.creadoEn | date: 'dd MMM yyyy, HH:mm' : '-0500' }} ·
+        {{ data.modalidad === 'EXPRESS' ? 'Compra express' : 'Compra normal' }}
+      </p>
+    </div>
+    <app-estado [estado]="data.estado"></app-estado>
+  </section>
+  <div class="test-banner">
+    <span class="test-icon">i</span>
+    <div>
+      <strong>Comprobante simulado.</strong> Sin validez tributaria. Correo y notificaciones se
+      capturan localmente salvo configuración del destino Boletos.
+    </div>
+  </div>
+  @if (data.ultimoError) {
+    <div class="alert warning" role="status">
+      <strong>Observación del procesamiento:</strong> {{ data.ultimoError }}
+    </div>
+  }
+  <div class="detail-grid">
+    <section class="panel">
+      <div class="panel-heading"><h2>Información del comprobante</h2></div>
+      <dl class="info-grid">
+        <div>
+          <dt>Tipo</dt>
+          <dd>{{ data.tipoComprobante }}</dd>
+        </div>
+        <div>
+          <dt>Serie y número</dt>
+          <dd>{{ data.serie ? data.serie + '-' + data.numero : 'Pendiente de generación' }}</dd>
+        </div>
+        <div>
+          <dt>Estado fiscal</dt>
+          <dd><app-estado [estado]="data.estadoFiscal"></app-estado></dd>
+        </div>
+        <div>
+          <dt>Estado de documentos</dt>
+          <dd><app-estado [estado]="data.estadoDocumentos"></app-estado></dd>
+        </div>
+        <div>
+          <dt>Fecha de emisión · Lima</dt>
+          <dd>
+            {{
+              data.fechaEmision
+                ? (data.fechaEmision | date: 'dd MMM yyyy, HH:mm:ss' : '-0500')
+                : 'Pendiente de confirmación'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Boletos incluidos</dt>
+          <dd>{{ data.cantidadBoletos }}</dd>
+        </div>
+        <div>
+          <dt>Total de la compra</dt>
+          <dd class="total-value">{{ data.total | currency: 'PEN' : 'S/ ' : '1.2-2' }}</dd>
+        </div>
+        <div>
+          <dt>Intentos de procesamiento</dt>
+          <dd>{{ data.intentos }}</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="panel">
+      <div class="panel-heading"><h2>Datos del comprador</h2></div>
+      <dl class="info-grid">
+        <div class="span-two">
+          <dt>Nombre o razón social</dt>
+          <dd>{{ data.comprador.nombre }}</dd>
+        </div>
+        <div>
+          <dt>{{ data.comprador.tipoDocumento }}</dt>
+          <dd>{{ data.comprador.numeroDocumento }}</dd>
+        </div>
+        <div>
+          <dt>Correo</dt>
+          <dd class="break-word">{{ data.comprador.correo }}</dd>
+        </div>
+        <div class="span-two">
+          <dt>Dirección</dt>
+          <dd>{{ data.comprador.direccion }}</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Documentos</h2>
+        <p>
+          Se preparan después de confirmar la emisión. En este ambiente la confirmación es simulada.
+        </p>
+      </div>
+      @if (data.estado === 'PROCESADO') {
+        <button class="button secondary" (click)="resend()" [disabled]="busy() || emailPending">
+          {{ busy() ? 'Registrando…' : 'Reenviar correo de prueba' }}
+        </button>
+      }
+      @if (data.estado === 'REQUIERE_ATENCION') {
+        <button class="button primary" (click)="retry()" [disabled]="busy()">
+          {{
+            busy()
+              ? 'Registrando…'
+              : data.estadoDocumentos === 'ERROR'
+                ? 'Recuperar documentos'
+                : 'Reintentar procesamiento'
+          }}
+        </button>
+      }
+    </div>
+    <div class="documents-grid">
+      @for (document of data.documentos; track document.id) {
+        <a class="document-card" [href]="document.descarga"
+          ><span class="document-type">{{ document.tipo }}</span>
+          <div>
+            <strong>{{
+              document.tipo === 'PDF'
+                ? 'Representación de prueba'
+                : document.tipo === 'XML'
+                  ? 'Datos del comprobante simulado'
+                  : 'Respuesta fiscal simulada'
+            }}</strong
+            ><small>{{ document.bytes | number }} bytes · Descargar documento</small>
+          </div>
+          <span aria-hidden="true">↓</span></a
+        >
+      } @empty {
+        <p class="inline-empty">
+          {{
+            data.estadoDocumentos === 'ERROR'
+              ? 'La emisión simulada está confirmada. Falta recuperar sus documentos; se conservará el mismo comprobante.'
+              : 'Todavía no hay documentos. El resultado se actualizará automáticamente.'
+          }}
+        </p>
+      }
+    </div>
+  </section>
+  <section class="panel">
+    <div class="panel-heading">
+      <h2>Boletos de la compra</h2>
+      <span class="subtle">{{ data.cantidadBoletos }} en un comprobante</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Concepto / boletos</th>
+            <th>Cantidad</th>
+            <th class="align-right">Precio unitario</th>
+            <th class="align-right">Descuento</th>
+            <th class="align-right">Impuesto informado</th>
+            <th class="align-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of data.compra.detalle; track $index) {
+            <tr>
+              <td>
+                {{ line.descripcion }}<small>{{ line.boletoIds.join(', ') }}</small>
+              </td>
+              <td>{{ line.cantidad }}</td>
+              <td class="align-right">
+                {{ line.precioUnitario | currency: 'PEN' : 'S/ ' : '1.2-2' }}
+              </td>
+              <td class="align-right">{{ line.descuento | currency: 'PEN' : 'S/ ' : '1.2-2' }}</td>
+              <td class="align-right">{{ line.impuesto | currency: 'PEN' : 'S/ ' : '1.2-2' }}</td>
+              <td class="align-right amount">
+                {{ line.total | currency: 'PEN' : 'S/ ' : '1.2-2' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <div class="detail-grid history-grid">
+    <section class="panel">
+      <div class="panel-heading"><h2>Historial de procesamiento</h2></div>
+      <ol class="timeline">
+        @for (event of data.historial; track $index) {
+          <li>
+            <span class="timeline-dot"></span>
+            <div>
+              <strong>{{ historyLabel(event.accion) }}</strong>
+              @if (event.detalle) {
+                <p>{{ event.detalle }}</p>
+              }
+              <small
+                >{{ event.creado_en | date: 'dd MMM yyyy, HH:mm:ss' : '-0500' }} ·
+                {{ event.actor }}</small
+              >
+            </div>
+          </li>
+        }
+      </ol>
+    </section>
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Correo y comunicación con Boletos</h2>
+        @if (failedDeliveries) {
+          <button class="button secondary compact" (click)="retryDeliveries()" [disabled]="busy()">
+            Reintentar entregas
+          </button>
+        }
+      </div>
+      <div class="delivery-list">
+        @for (delivery of data.entregas; track delivery.id) {
+          <div class="delivery-item">
+            <div>
+              <strong>{{
+                delivery.tipo === 'CORREO' ? 'Correo del comprobante' : 'Resultado a Boletos'
+              }}</strong
+              ><small
+                >{{ delivery.creado_en | date: 'dd MMM, HH:mm:ss' : '-0500' }} ·
+                {{ delivery.intentos }} intento(s)</small
+              >
+              @if (delivery.ultimo_error) {
+                <p class="delivery-error">{{ delivery.ultimo_error }}</p>
+              }
+            </div>
+            <app-estado [estado]="delivery.estado"></app-estado>
+          </div>
+        } @empty {
+          <p class="inline-empty">Las entregas aparecerán cuando exista un resultado.</p>
+        }
+      </div>
+    </section>
+  </div>
+} @else if (!error()) {
+  <div class="empty-state" role="status">
+    <h2>Consultando comprobante…</h2>
+    <p>Estamos recuperando los datos y sus documentos.</p>
+  </div>
+}

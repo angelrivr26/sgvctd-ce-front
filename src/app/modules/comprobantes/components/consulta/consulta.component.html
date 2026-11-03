@@ -1,0 +1,296 @@
+<section class="page-heading">
+  <div>
+    <span class="eyebrow">CONTROL Y SEGUIMIENTO</span>
+    <h1>Comprobantes electrónicos</h1>
+    <p>Consulta el estado de cada compra y accede a sus documentos.</p>
+  </div>
+  <button class="button primary" (click)="showDemo.set(!showDemo())">
+    <span aria-hidden="true">＋</span> Compra de prueba
+  </button>
+</section>
+<div class="test-banner">
+  <span class="test-icon" aria-hidden="true">i</span>
+  <div>
+    <strong>Estás en un ambiente de pruebas.</strong> La emisión es simulada; los documentos no
+    tienen validez tributaria.
+  </div>
+  <span class="subtle">Proveedor simulado</span>
+</div>
+@if (notice()) {
+  <div class="alert success" role="status">
+    {{ notice()
+    }}<button class="text-button" (click)="notice.set('')" aria-label="Cerrar aviso">×</button>
+  </div>
+}
+@if (error()) {
+  <div class="alert error" role="alert">{{ error() }}</div>
+}
+@if (showDemo()) {
+  <section class="panel demo-panel" aria-labelledby="demo-title">
+    <div class="panel-heading">
+      <div>
+        <h2 id="demo-title">Nueva compra de prueba</h2>
+        <p>Datos ficticios. Elige el escenario que quieres verificar.</p>
+      </div>
+      <button
+        class="text-button"
+        (click)="showDemo.set(false)"
+        aria-label="Cerrar formulario de prueba"
+      >
+        Cerrar
+      </button>
+    </div>
+    <form class="demo-form" (ngSubmit)="createDemo()" #demoForm="ngForm">
+      <div class="field">
+        <label for="demo-modalidad">Modalidad</label
+        ><select id="demo-modalidad" name="demo-modalidad" [(ngModel)]="demo.modalidad">
+          <option value="NORMAL">Compra normal</option>
+          <option value="EXPRESS">Compra express</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="demo-tipo">Comprobante</label
+        ><select id="demo-tipo" name="demo-tipo" [(ngModel)]="demo.tipoComprobante">
+          <option value="BOLETA">Boleta</option>
+          <option value="FACTURA">Factura</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="demo-cantidad">Cantidad de boletos</label
+        ><input
+          id="demo-cantidad"
+          name="demo-cantidad"
+          [(ngModel)]="demo.cantidad"
+          type="number"
+          min="1"
+          max="20"
+          required
+        />
+      </div>
+      <div class="field">
+        <label for="demo-escenario">Escenario</label
+        ><select id="demo-escenario" name="demo-escenario" [(ngModel)]="demo.escenarioPrueba">
+          <option value="EXITO">Emisión exitosa</option>
+          <option value="RECHAZO">Datos rechazados</option>
+          <option value="ERROR_TEMPORAL">Falla temporal recuperable</option>
+          <option value="RESPUESTA_INCIERTA">Respuesta perdida</option>
+          <option value="DEMORADO">Procesamiento demorado</option>
+        </select>
+      </div>
+      <button class="button primary" type="submit" [disabled]="creating() || demoForm.invalid">
+        {{ creating() ? 'Registrando…' : 'Registrar compra' }}
+      </button>
+    </form>
+  </section>
+}
+<section class="stats-grid" aria-label="Resumen de la consulta">
+  <article class="stat-card">
+    <div class="stat-top">
+      <span>Compras en consulta</span><span class="stat-icon neutral">▤</span>
+    </div>
+    <strong>{{ result()?.resumen?.total ?? 0 }}</strong
+    ><small>Un comprobante por compra</small>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top">
+      <span>Pendientes y en proceso</span><span class="stat-icon amber">◷</span>
+    </div>
+    <strong>{{
+      (result()?.resumen?.pendientes ?? 0) + (result()?.resumen?.procesando ?? 0)
+    }}</strong
+    ><small>En la cola de procesamiento</small>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>Procesados</span><span class="stat-icon green">✓</span></div>
+    <strong>{{ result()?.resumen?.procesados ?? 0 }}</strong
+    ><small>Documentos de prueba disponibles</small>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>Requieren atención</span><span class="stat-icon red">!</span></div>
+    <strong>{{ result()?.resumen?.incidencias ?? 0 }}</strong
+    ><small>Revisa el motivo en el detalle</small>
+  </article>
+</section>
+<section class="panel register-panel" aria-labelledby="registro-title">
+  <div class="panel-heading">
+    <div>
+      <h2 id="registro-title">Registro de comprobantes</h2>
+      <p>Compras normales y express, con uno o varios boletos.</p>
+    </div>
+    <button class="button secondary compact" (click)="refresh()" [disabled]="loading()">
+      <span aria-hidden="true">↻</span> Actualizar
+    </button>
+  </div>
+  <form class="filters" (ngSubmit)="refresh(true)">
+    <div class="field search-field">
+      <label for="buscar">Buscar compra o comprador</label
+      ><input
+        id="buscar"
+        name="buscar"
+        [(ngModel)]="filters.buscar"
+        maxlength="80"
+        placeholder="N.º de compra, nombre o documento"
+      />
+    </div>
+    <div class="field">
+      <label for="fecha">Fecha de recepción · Lima</label
+      ><input
+        id="fecha"
+        name="fecha"
+        type="date"
+        [(ngModel)]="filters.fecha"
+        (change)="refresh(true)"
+      />
+    </div>
+    <div class="field">
+      <label for="estado">Estado</label
+      ><select id="estado" name="estado" [(ngModel)]="filters.estado" (change)="refresh(true)">
+        <option value="">Todos los estados</option>
+        <option value="PENDIENTE">Pendiente</option>
+        <option value="PROCESANDO">Procesando</option>
+        <option value="PROCESADO">Procesado</option>
+        <option value="REQUIERE_ATENCION">Requiere atención</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="modalidad">Modalidad</label
+      ><select
+        id="modalidad"
+        name="modalidad"
+        [(ngModel)]="filters.modalidad"
+        (change)="refresh(true)"
+      >
+        <option value="">Todas</option>
+        <option value="NORMAL">Normal</option>
+        <option value="EXPRESS">Express</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="tipo">Tipo</label
+      ><select id="tipo" name="tipo" [(ngModel)]="filters.tipo" (change)="refresh(true)">
+        <option value="">Todos</option>
+        <option value="BOLETA">Boleta</option>
+        <option value="FACTURA">Factura</option>
+      </select>
+    </div>
+    <button class="button secondary" type="submit">Buscar</button
+    ><button class="text-button clear-button" type="button" (click)="clear()">Limpiar</button>
+  </form>
+  <div class="table-meta">
+    <span
+      >{{ result()?.resumen?.total ?? 0 }} resultados <span class="meta-divider">·</span>
+      {{ filters.fecha || 'Todas las fechas' }}</span
+    ><span class="live-state" role="status"
+      ><span class="status-dot"></span
+      >{{ loading() ? 'Actualizando…' : 'Actualización automática' }}
+      @if (updatedAt()) {
+        <span class="subtle">{{ updatedAt() | date: 'HH:mm:ss' : '-0500' }}</span>
+      }
+    </span>
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Compra / fecha</th>
+          <th scope="col">Comprador</th>
+          <th scope="col">Comprobante</th>
+          <th scope="col">Modalidad</th>
+          <th scope="col" class="align-right">Total</th>
+          <th scope="col">Estado</th>
+          <th scope="col"><span class="sr-only">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of result()?.datos ?? []; track row.id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/comprobantes', row.id]" class="purchase-link">{{
+                row.compraId
+              }}</a
+              ><small>{{ row.creadoEn | date: 'dd MMM yyyy, HH:mm' : '-0500' }}</small>
+            </td>
+            <td>
+              <span class="buyer-name">{{ row.comprador.nombre }}</span
+              ><small>{{ row.comprador.tipoDocumento }} {{ row.comprador.numeroDocumento }}</small>
+            </td>
+            <td>
+              <span>{{ row.tipoComprobante === 'FACTURA' ? 'Factura' : 'Boleta' }}</span
+              ><small>{{
+                row.serie
+                  ? row.serie + '-' + row.numero
+                  : row.cantidadBoletos + (row.cantidadBoletos === 1 ? ' boleto' : ' boletos')
+              }}</small>
+            </td>
+            <td>
+              <span class="mode-label" [class.express]="row.modalidad === 'EXPRESS'">{{
+                row.modalidad === 'EXPRESS' ? 'Express' : 'Normal'
+              }}</span>
+            </td>
+            <td class="align-right amount">{{ row.total | currency: 'PEN' : 'S/ ' : '1.2-2' }}</td>
+            <td>
+              <app-estado [estado]="row.estado"></app-estado>
+              @if (row.estadoDocumentos === 'ERROR') {
+                <small>Documentos por recuperar</small>
+              }
+            </td>
+            <td class="align-right">
+              <button
+                class="row-action"
+                (click)="detail(row.id)"
+                [attr.aria-label]="'Ver compra ' + row.compraId"
+              >
+                Ver detalle <span aria-hidden="true">→</span>
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon" aria-hidden="true">▤</div>
+                <h3>
+                  {{
+                    loading() ? 'Consultando comprobantes…' : 'No hay comprobantes en esta consulta'
+                  }}
+                </h3>
+                <p>
+                  {{
+                    loading()
+                      ? 'La información estará disponible en un momento.'
+                      : 'Ajusta los filtros o registra una compra de prueba para verificar el circuito.'
+                  }}
+                </p>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="pagination">
+    <span
+      >Página {{ filters.pagina }} de {{ lastPage }} <span class="meta-divider">·</span>
+      {{ filters.limite }} por página</span
+    >
+    <div>
+      <button
+        class="button secondary compact"
+        (click)="page(-1)"
+        [disabled]="filters.pagina <= 1 || loading()"
+      >
+        ← Anterior</button
+      ><button
+        class="button secondary compact"
+        (click)="page(1)"
+        [disabled]="filters.pagina >= lastPage || loading()"
+      >
+        Siguiente →
+      </button>
+    </div>
+  </div>
+</section>
+<div class="bottom-note">
+  <span aria-hidden="true">⌁</span> Los comprobantes se procesan en segundo plano. Puedes continuar
+  trabajando mientras se generan.
+</div>
