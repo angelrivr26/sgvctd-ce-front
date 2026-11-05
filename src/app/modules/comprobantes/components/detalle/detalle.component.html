@@ -20,8 +20,9 @@
   <div class="test-banner">
     <span class="test-icon">i</span>
     <div>
-      <strong>Comprobante simulado.</strong> Sin validez tributaria. Correo y notificaciones se
-      capturan localmente salvo configuración del destino Boletos.
+      <strong>{{ data.simulado ? 'Comprobante simulado.' : 'Prueba de SUNAT beta.' }}</strong> Sin
+      validez tributaria. Correo y notificaciones se capturan localmente salvo configuración del
+      destino Boletos.
     </div>
   </div>
   @if (data.ultimoError) {
@@ -99,16 +100,18 @@
     <div class="panel-heading">
       <div>
         <h2>Documentos</h2>
-        <p>
-          Se preparan después de confirmar la emisión. En este ambiente la confirmación es simulada.
-        </p>
+        <p>Se preparan después de guardar la confirmación del proveedor de pruebas.</p>
       </div>
       @if (data.estado === 'PROCESADO') {
         <button class="button secondary" (click)="resend()" [disabled]="busy() || emailPending">
           {{ busy() ? 'Registrando…' : 'Reenviar correo de prueba' }}
         </button>
       }
-      @if (data.estado === 'REQUIERE_ATENCION') {
+      @if (
+        data.estado === 'REQUIERE_ATENCION' &&
+        data.estadoFiscal !== 'RECHAZADO_BETA' &&
+        data.estadoFiscal !== 'ERROR_SOAP_BETA'
+      ) {
         <button class="button primary" (click)="retry()" [disabled]="busy()">
           {{
             busy()
@@ -129,8 +132,12 @@
               document.tipo === 'PDF'
                 ? 'Representación de prueba'
                 : document.tipo === 'XML'
-                  ? 'Datos del comprobante simulado'
-                  : 'Respuesta fiscal simulada'
+                  ? data.simulado
+                    ? 'Datos del comprobante simulado'
+                    : 'XML firmado de prueba beta'
+                  : data.simulado
+                    ? 'Respuesta fiscal simulada'
+                    : 'Constancia de SUNAT beta'
             }}</strong
             ><small>{{ document.bytes | number }} bytes · Descargar documento</small>
           </div>
@@ -140,7 +147,9 @@
         <p class="inline-empty">
           {{
             data.estadoDocumentos === 'ERROR'
-              ? 'La emisión simulada está confirmada. Falta recuperar sus documentos; se conservará el mismo comprobante.'
+              ? data.simulado
+                ? 'La emisión simulada está confirmada. Falta recuperar sus documentos; se conservará el mismo comprobante.'
+                : 'La aceptación beta está confirmada. Falta recuperar sus documentos; se conservará el mismo comprobante.'
               : 'Todavía no hay documentos. El resultado se actualizará automáticamente.'
           }}
         </p>

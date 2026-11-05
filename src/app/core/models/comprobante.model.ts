@@ -7,7 +7,7 @@ export interface Comprador {
   tipoDocumento: string;
   numeroDocumento: string;
   correo: string;
-  direccion: string;
+  direccion?: string;
 }
 export interface Comprobante {
   id: string;
