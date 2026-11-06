@@ -1,23 +1,40 @@
 @if (auth.usuario()) {
-  <div class="app-layout">
-    <aside class="sidebar" aria-label="Navegación principal">
-      <a class="brand" routerLink="/comprobantes" aria-label="SERNANP, inicio"
-        ><img src="assets/logo-sernanp.svg" alt="SERNANP" /><span
-          >COMPROBANTES ELECTRÓNICOS</span
-        ></a
+  <div class="app-layout" [class.sidebar-collapsed]="sidebarCollapsed()">
+    <aside
+      id="panel-lateral"
+      class="sidebar"
+      [class.collapsed]="sidebarCollapsed()"
+      aria-label="Navegación principal"
+    >
+      <button
+        class="sidebar-toggle"
+        type="button"
+        (click)="toggleSidebar()"
+        aria-controls="contenido-panel-lateral"
+        [attr.aria-expanded]="!sidebarCollapsed()"
+        [attr.aria-label]="sidebarCollapsed() ? 'Mostrar panel lateral' : 'Ocultar panel lateral'"
       >
-      <div class="sidebar-label">CONTABILIDAD</div>
-      <a class="nav-link active" routerLink="/comprobantes" routerLinkActive="active"
-        ><span class="nav-symbol">▤</span> Comprobantes <span class="nav-arrow">›</span></a
-      >
-      <div class="sidebar-note">
-        <span class="small-label">AMBIENTE DE PRUEBAS</span>
-        <p>Una compra.<br />Todos sus boletos.<br />Un comprobante.</p>
-        <span>Integración con Boletos SERNANP</span>
-      </div>
-      <div class="sidebar-footer">
-        <span class="status-dot"></span> Emisión en pruebas
-        <small>Versión inicial · 0.1.0</small>
+        <span aria-hidden="true">{{ sidebarCollapsed() ? '›' : '‹' }}</span>
+      </button>
+      <div id="contenido-panel-lateral" class="sidebar-content" [hidden]="sidebarCollapsed()">
+        <a class="brand" routerLink="/comprobantes" aria-label="SERNANP, inicio"
+          ><img src="assets/logo-sernanp.svg" alt="SERNANP" /><span
+            >COMPROBANTES ELECTRÓNICOS</span
+          ></a
+        >
+        <div class="sidebar-label"></div>
+        <a class="nav-link active" routerLink="/comprobantes" routerLinkActive="active"
+          ><span class="nav-symbol">▤</span> Comprobantes <span class="nav-arrow">›</span></a
+        >
+        <div class="sidebar-note">
+          <span class="small-label"> </span>
+          <p><br /><br /></p>
+          <span> </span>
+        </div>
+        <div class="sidebar-footer">
+          Comprobantes electrónicos <span class="status-dot"> </span>
+          <small>Versión inicial · 0.1.0</small>
+        </div>
       </div>
     </aside>
     <div class="workspace">
@@ -26,8 +43,8 @@
           Contabilidad <span>/</span> <strong>Comprobantes electrónicos</strong>
         </div>
         <div class="user-area">
-          <span class="environment-pill">PRUEBAS</span><span class="avatar">C</span
-          ><span class="username">{{ auth.usuario() }}</span
+          <!-- <span class="environment-pill"> </span> -->
+          <span class="avatar">C</span><span class="username">{{ auth.usuario() }}</span
           ><button class="text-button" (click)="logout()">Salir</button>
         </div>
       </header>

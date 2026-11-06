@@ -27,15 +27,9 @@ export class ConsultaComponent implements OnInit {
   readonly showDemo = signal(false);
   readonly creating = signal(false);
   readonly updatedAt = signal<Date | null>(null);
-  filters: Consulta = {
-    pagina: 1,
-    limite: 15,
-    fecha: '',
-    estado: '',
-    modalidad: '',
-    tipo: '',
-    buscar: '',
-  };
+  readonly activeTab = signal<'registro' | 'resumen'>('registro');
+  readonly todayInLima = this.limaDay(new Date());
+  filters: Consulta = this.initialFilters();
   demo: CompraPrueba = {
     modalidad: 'NORMAL',
     tipoComprobante: 'BOLETA',
@@ -71,19 +65,12 @@ export class ConsultaComponent implements OnInit {
       });
   }
   refresh(resetPage = false) {
+    if (!this.filters.fecha) this.filters.fecha = this.todayInLima;
     if (resetPage) this.filters.pagina = 1;
     this.reload.next();
   }
   clear() {
-    this.filters = {
-      pagina: 1,
-      limite: 15,
-      fecha: '',
-      estado: '',
-      modalidad: '',
-      tipo: '',
-      buscar: '',
-    };
+    this.filters = this.initialFilters();
     this.refresh();
   }
   page(delta: number) {
@@ -114,5 +101,45 @@ export class ConsultaComponent implements OnInit {
   }
   detail(id: string) {
     void this.router.navigate(['/comprobantes', id]);
+  }
+
+  handleTabKeydown(event: KeyboardEvent) {
+    const tabs: ('registro' | 'resumen')[] = ['registro', 'resumen'];
+    const current = tabs.indexOf(this.activeTab());
+    let next: 'registro' | 'resumen' | undefined;
+    if (event.key === 'ArrowRight') next = tabs[(current + 1) % tabs.length];
+    if (event.key === 'ArrowLeft') next = tabs[(current - 1 + tabs.length) % tabs.length];
+    if (event.key === 'Home') next = tabs[0];
+    if (event.key === 'End') next = tabs[tabs.length - 1];
+    if (!next) return;
+    event.preventDefault();
+    this.activeTab.set(next);
+    (event.currentTarget as HTMLElement).parentElement
+      ?.querySelector<HTMLElement>(`#tab-${next}`)
+      ?.focus();
+  }
+
+  private initialFilters(): Consulta {
+    return {
+      pagina: 1,
+      limite: 15,
+      fecha: this.todayInLima,
+      estado: '',
+      modalidad: '',
+      tipo: '',
+      buscar: '',
+    };
+  }
+
+  private limaDay(date: Date): string {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Lima',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(date);
+    const value = (type: 'year' | 'month' | 'day') =>
+      parts.find((part) => part.type === type)?.value ?? '';
+    return `${value('year')}-${value('month')}-${value('day')}`;
   }
 }

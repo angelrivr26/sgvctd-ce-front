@@ -4,18 +4,17 @@
     <h1>Comprobantes electrónicos</h1>
     <p>Consulta el estado de cada compra y accede a sus documentos.</p>
   </div>
-  <button class="button primary" (click)="showDemo.set(!showDemo())">
+  <!-- <button class="button primary" (click)="showDemo.set(!showDemo())">
     <span aria-hidden="true">＋</span> Compra de prueba
-  </button>
+  </button> -->
 </section>
-<div class="test-banner">
+<!-- <div class="test-banner">
   <span class="test-icon" aria-hidden="true">i</span>
   <div>
-    <strong>Estás en un ambiente de pruebas.</strong> Los documentos de simulación o SUNAT beta no
-    tienen validez tributaria.
+    <strong>Estás en un ambiente de pruebas.</strong>
   </div>
-  <span class="subtle">Sin validez tributaria</span>
-</div>
+  <span class="subtle"></span>
+</div> -->
 @if (notice()) {
   <div class="alert success" role="status">
     {{ notice()
@@ -83,7 +82,43 @@
     </form>
   </section>
 }
-<section class="stats-grid" aria-label="Resumen de la consulta">
+<div class="view-tabs" role="tablist" aria-label="Vistas de comprobantes">
+  <button
+    id="tab-registro"
+    class="view-tab"
+    type="button"
+    role="tab"
+    [class.active]="activeTab() === 'registro'"
+    [attr.aria-selected]="activeTab() === 'registro'"
+    [attr.tabindex]="activeTab() === 'registro' ? 0 : -1"
+    aria-controls="panel-registro"
+    (click)="activeTab.set('registro')"
+    (keydown)="handleTabKeydown($event)"
+  >
+    Registro de comprobantes
+  </button>
+  <button
+    id="tab-resumen"
+    class="view-tab"
+    type="button"
+    role="tab"
+    [class.active]="activeTab() === 'resumen'"
+    [attr.aria-selected]="activeTab() === 'resumen'"
+    [attr.tabindex]="activeTab() === 'resumen' ? 0 : -1"
+    aria-controls="panel-resumen"
+    (click)="activeTab.set('resumen')"
+    (keydown)="handleTabKeydown($event)"
+  >
+    Resumen
+  </button>
+</div>
+<section
+  id="panel-resumen"
+  class="stats-grid"
+  role="tabpanel"
+  aria-labelledby="tab-resumen"
+  [hidden]="activeTab() !== 'resumen'"
+>
   <article class="stat-card">
     <div class="stat-top">
       <span>Compras en consulta</span><span class="stat-icon neutral">▤</span>
@@ -111,10 +146,16 @@
     ><small>Revisa el motivo en el detalle</small>
   </article>
 </section>
-<section class="panel register-panel" aria-labelledby="registro-title">
+<section
+  id="panel-registro"
+  class="panel register-panel"
+  role="tabpanel"
+  aria-labelledby="tab-registro registro-title"
+  [hidden]="activeTab() !== 'registro'"
+>
   <div class="panel-heading">
     <div>
-      <h2 id="registro-title">Registro de comprobantes</h2>
+      <h2 id="registro-title"> </h2>
       <p>Compras normales y express, con uno o varios boletos.</p>
     </div>
     <button class="button secondary compact" (click)="refresh()" [disabled]="loading()">
@@ -133,13 +174,14 @@
       />
     </div>
     <div class="field">
-      <label for="fecha">Fecha de recepción · Lima</label
+      <label for="fecha">Día de pago · Lima</label
       ><input
         id="fecha"
         name="fecha"
         type="date"
         [(ngModel)]="filters.fecha"
         (change)="refresh(true)"
+        required
       />
     </div>
     <div class="field">
@@ -178,8 +220,8 @@
   </form>
   <div class="table-meta">
     <span
-      >{{ result()?.resumen?.total ?? 0 }} resultados <span class="meta-divider">·</span>
-      {{ filters.fecha || 'Todas las fechas' }}</span
+      >{{ result()?.resumen?.total ?? 0 }} resultados <span class="meta-divider">·</span> Día:
+      {{ filters.fecha | date: 'dd/MM/yyyy' : 'UTC' }}</span
     ><span class="live-state" role="status"
       ><span class="status-dot"></span
       >{{ loading() ? 'Actualizando…' : 'Actualización automática' }}
@@ -192,7 +234,7 @@
     <table>
       <thead>
         <tr>
-          <th scope="col">Compra / fecha</th>
+          <th scope="col">Compra / fecha de pago</th>
           <th scope="col">Comprador</th>
           <th scope="col">Comprobante</th>
           <th scope="col">Modalidad</th>
@@ -208,7 +250,7 @@
               <a [routerLink]="['/comprobantes', row.id]" class="purchase-link">{{
                 row.compraId
               }}</a
-              ><small>{{ row.creadoEn | date: 'dd MMM yyyy, HH:mm' : '-0500' }}</small>
+              ><small>{{ row.fechaPago | date: 'dd MMM yyyy, HH:mm' : '-0500' }}</small>
             </td>
             <td>
               <span class="buyer-name">{{ row.comprador.nombre }}</span

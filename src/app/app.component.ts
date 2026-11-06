@@ -7,6 +7,12 @@ export class AppComponent {
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   readonly error = signal('');
+  readonly sidebarCollapsed = signal(false);
+
+  toggleSidebar() {
+    this.sidebarCollapsed.update((collapsed) => !collapsed);
+  }
+
   logout() {
     this.auth.logout().subscribe({
       next: () => {

@@ -18,6 +18,7 @@ export interface Comprobante {
   comprador: Comprador;
   total: string;
   moneda: string;
+  fechaPago: string;
   cantidadBoletos: number;
   estado: EstadoComprobante;
   estadoFiscal: string;

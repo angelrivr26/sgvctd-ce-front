@@ -17,14 +17,14 @@
     </div>
     <app-estado [estado]="data.estado"></app-estado>
   </section>
-  <div class="test-banner">
+  <!-- <div class="test-banner">
     <span class="test-icon">i</span>
     <div>
       <strong>{{ data.simulado ? 'Comprobante simulado.' : 'Prueba de SUNAT beta.' }}</strong> Sin
       validez tributaria. Correo y notificaciones se capturan localmente salvo configuración del
       destino Boletos.
     </div>
-  </div>
+  </div> -->
   @if (data.ultimoError) {
     <div class="alert warning" role="status">
       <strong>Observación del procesamiento:</strong> {{ data.ultimoError }}
@@ -194,7 +194,7 @@
       </table>
     </div>
   </section>
-  <div class="detail-grid history-grid">
+  <!-- <div class="detail-grid history-grid">
     <section class="panel">
       <div class="panel-heading"><h2>Historial de procesamiento</h2></div>
       <ol class="timeline">
@@ -246,7 +246,7 @@
         }
       </div>
     </section>
-  </div>
+  </div> -->
 } @else if (!error()) {
   <div class="empty-state" role="status">
     <h2>Consultando comprobante…</h2>
