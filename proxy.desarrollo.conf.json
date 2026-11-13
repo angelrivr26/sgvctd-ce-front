@@ -1,0 +1,7 @@
+{
+  "/api": {
+    "target": "https://desarrollo.sernanp.gob.pe",
+    "secure": true,
+    "changeOrigin": true
+  }
+}
