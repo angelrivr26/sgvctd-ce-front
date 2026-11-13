@@ -66,7 +66,9 @@
         </div>
         <div>
           <dt>Total de la compra</dt>
-          <dd class="total-value">{{ data.total | currency: 'PEN' : 'S/ ' : '1.2-2' }}</dd>
+          <dd class="total-value">
+            {{ data.total | currency: 'PEN' : 'S/ ' : '1.2-2' : 'en-US' }}
+          </dd>
         </div>
         <div>
           <dt>Intentos de procesamiento</dt>
@@ -181,12 +183,16 @@
               </td>
               <td>{{ line.cantidad }}</td>
               <td class="align-right">
-                {{ line.precioUnitario | currency: 'PEN' : 'S/ ' : '1.2-2' }}
+                {{ line.precioUnitario | currency: 'PEN' : 'S/ ' : '1.2-2' : 'en-US' }}
               </td>
-              <td class="align-right">{{ line.descuento | currency: 'PEN' : 'S/ ' : '1.2-2' }}</td>
-              <td class="align-right">{{ line.impuesto | currency: 'PEN' : 'S/ ' : '1.2-2' }}</td>
+              <td class="align-right">
+                {{ line.descuento | currency: 'PEN' : 'S/ ' : '1.2-2' : 'en-US' }}
+              </td>
+              <td class="align-right">
+                {{ line.impuesto | currency: 'PEN' : 'S/ ' : '1.2-2' : 'en-US' }}
+              </td>
               <td class="align-right amount">
-                {{ line.total | currency: 'PEN' : 'S/ ' : '1.2-2' }}
+                {{ line.total | currency: 'PEN' : 'S/ ' : '1.2-2' : 'en-US' }}
               </td>
             </tr>
           }

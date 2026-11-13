@@ -23,7 +23,6 @@ export interface Comprobante {
   estado: EstadoComprobante;
   estadoFiscal: string;
   estadoDocumentos: 'NO_HABILITADOS' | 'PENDIENTES' | 'GENERANDO' | 'DISPONIBLES' | 'ERROR';
-  versionPlantilla: string | null;
   fechaEmision: string | null;
   serie: string | null;
   numero: string | null;

@@ -269,7 +269,9 @@
                 row.modalidad === 'EXPRESS' ? 'Express' : 'Normal'
               }}</span>
             </td>
-            <td class="align-right amount">{{ row.total | currency: 'PEN' : 'S/ ' : '1.2-2' }}</td>
+            <td class="align-right amount">
+              {{ row.total | currency: 'PEN' : 'S/ ' : '1.2-2' : 'en-US' }}
+            </td>
             <td>
               <app-estado [estado]="row.estado"></app-estado>
               @if (row.estadoDocumentos === 'ERROR') {
