@@ -11,7 +11,7 @@ COPY . .
 RUN npm run build
 
 # Publicación
-FROM nginx:alpine
+FROM nginx:1.25-alpine
 
 COPY --from=build /app/dist/comprobantes /usr/share/nginx/html
 
