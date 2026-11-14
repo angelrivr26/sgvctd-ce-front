@@ -2,5 +2,5 @@
 export const environment = {
   production: false,
   //API_URL: '/api/v1',
-  API_URL: 'http://10.10.14.130:4005/api'
+  API_URL: 'http://10.10.14.130:4005/api/v1'
 };
