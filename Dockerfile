@@ -13,7 +13,7 @@ RUN npm run build
 # Publicación
 FROM nginx:alpine
 
-COPY --from=build /app/dist/sernanp-frontend-comprobantes /usr/share/nginx/html
+COPY --from=build /app/dist/comprobantes /usr/share/nginx/html
 
 EXPOSE 80
 
